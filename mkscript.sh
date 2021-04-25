@@ -34,14 +34,28 @@ function checkFileExtension () {
     esac
 }
 
+function validateFileName () {
+    FILE=$1
+    if [[ $FILE =~ ['!@#$%^&*()_+'] || $FILE == -* ]]; then
+        echo "name $FILE is invalid"
+        return 1
+    else
+        return 0
+    fi
+}
+
 while (( "$#" )); do
     FILE=$1 # get the name for the file
     shift # shift to the next value for the next file if any
 
-    # check if a script/command exists with the same name, if it doesnt it creates the file, changes permissions and inserts the first line for the script 
-    if [[ ! ( (-e /home/${USER}/bin/${FILE}) || (-e /bin/${FILE}) || (-e /sbin/${FILE}) || (-e /usr/bin/${FILE}) ) ]]; then
-        checkFileExtension $FILE
-    else
-        echo "a file named ${FILE} already exists"
+    #if fc validateFileName returns 1 FileName is invalid
+    validateFileName ${FILE}
+    if [[ $? == 0 ]]; then
+        # check if a script/command exists with the same name, if it doesnt it creates the file, changes permissions and inserts the first line for the script 
+        if [[ ! ( (-e /home/${USER}/bin/${FILE}) || (-e /bin/${FILE}) || (-e /sbin/${FILE}) || (-e /usr/bin/${FILE}) ) ]]; then
+            checkFileExtension $FILE
+        else
+            echo "a file named ${FILE} already exists"
+        fi
     fi
 done
